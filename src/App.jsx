@@ -1,12 +1,38 @@
 import React, { useState } from 'react';
 import Player from './components/player.jsx';
 import Gamebord from './components/gameboard.jsx';
+import Log from './components/log..jsx';
+import { WINNING_COMBINATIONS } from './winning-combinations.js';
 
+function deriveActivePlayer(gameTurns) {
+  let currentPlayer = 'X';
+
+  if (gameTurns.length > 0 && gameTurns[0].player === 'X') {
+    currentPlayer = 'O';
+  }
+  // else if (gameTurns.length > 0 && gameTurns.player === 'X') {
+  //   currentPlayer = 'X';
+  // }
+  return currentPlayer;
+}
 function App() {
-  const [activePlayer, setActivePlayer] = useState('X');
+  const [gameTurns, setGameTurns] = useState([]);
+  // const [activePlayer, setActivePlayer] = useState('X');
 
-  function handleActivePlayer() {
-    setActivePlayer((selectedPlayed) => (selectedPlayed === 'X' ? 'O' : 'X'));
+  const activePlayer = deriveActivePlayer(gameTurns);
+
+  function handleActivePlayer(rowIndex, colIndex) {
+    // setActivePlayer((selectedPlayed) => (selectedPlayed === 'X' ? 'O' : 'X'));
+    setGameTurns((prevTurns) => {
+      const currentPlayer = deriveActivePlayer(prevTurns);
+
+      const updatedTurns = [
+        { square: { row: rowIndex, col: colIndex }, player: currentPlayer },
+        ...prevTurns,
+      ];
+
+      return updatedTurns;
+    });
   }
 
   return (
@@ -27,10 +53,10 @@ function App() {
         <Gamebord
           //if you want to pass the function to the child component, name it and pass the function within it.
           onSelectedSquare={handleActivePlayer}
-          activePlayerSymbol={activePlayer}
+          turns={gameTurns}
         />
       </div>
-      Log
+      <Log logturns={gameTurns} />
     </main>
   );
 }
