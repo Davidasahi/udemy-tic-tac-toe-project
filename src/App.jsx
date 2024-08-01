@@ -1,25 +1,60 @@
 import React, { useState } from 'react';
 import Player from './components/player.jsx';
-import Gamebord from './components/gameboard.jsx';
-import Log from './components/log..jsx';
+import Gameboard from './components/gameboard.jsx';
+import Gameover from './components/gameisover.jsx';
+import Log from './components/log.jsx';
 import { WINNING_COMBINATIONS } from './winning-combinations.js';
 
-function deriveActivePlayer(gameTurns) {
-  let currentPlayer = 'X';
+const initialBoard = [
+  [null, null, null],
+  [null, null, null],
+  [null, null, null],
+];
 
-  if (gameTurns.length > 0 && gameTurns[0].player === 'X') {
-    currentPlayer = 'O';
+function deriveActivePlayer(gameTurns) {
+  if (gameTurns.length === 0) {
+    return 'X'; // The first player is always 'X'
   }
-  // else if (gameTurns.length > 0 && gameTurns.player === 'X') {
-  //   currentPlayer = 'X';
-  // }
-  return currentPlayer;
+
+  const lastTurn = gameTurns[0];
+  return lastTurn.player === 'X' ? 'O' : 'X';
 }
+
 function App() {
   const [gameTurns, setGameTurns] = useState([]);
   // const [activePlayer, setActivePlayer] = useState('X');
 
   const activePlayer = deriveActivePlayer(gameTurns);
+
+  const gameBoard = initialBoard;
+
+  for (const turn of gameTurns) {
+    const { square, player } = turn;
+    const { row, col } = square;
+
+    gameBoard[row][col] = player;
+  }
+
+  let winnerPlayer = null;
+
+  for (const combination of WINNING_COMBINATIONS) {
+    const firstSquareSymbol =
+      gameBoard[combination[0].row][combination[0].column];
+    const secondSquareSymbol =
+      gameBoard[combination[1].row][combination[1].column];
+    const thirdSquareSymbol =
+      gameBoard[combination[2].row][combination[2].column];
+
+    if (
+      firstSquareSymbol &&
+      firstSquareSymbol === secondSquareSymbol &&
+      firstSquareSymbol === thirdSquareSymbol
+    ) {
+      winnerPlayer = firstSquareSymbol;
+    }
+  }
+
+  const hasDraw = gameTurns.length === 9 && !winnerPlayer;
 
   function handleActivePlayer(rowIndex, colIndex) {
     // setActivePlayer((selectedPlayed) => (selectedPlayed === 'X' ? 'O' : 'X'));
@@ -50,11 +85,8 @@ function App() {
             isActive={activePlayer === 'O'}
           />
         </ol>
-        <Gamebord
-          //if you want to pass the function to the child component, name it and pass the function within it.
-          onSelectedSquare={handleActivePlayer}
-          turns={gameTurns}
-        />
+        {(winnerPlayer || hasDraw) && <Gameover winner={winnerPlayer} />}
+        <Gameboard onSelectedSquare={handleActivePlayer} board={gameBoard} />
       </div>
       <Log logturns={gameTurns} />
     </main>
