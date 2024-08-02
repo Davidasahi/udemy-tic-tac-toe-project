@@ -22,11 +22,15 @@ function deriveActivePlayer(gameTurns) {
 
 function App() {
   const [gameTurns, setGameTurns] = useState([]);
-  // const [activePlayer, setActivePlayer] = useState('X');
+  const [playerSymbol, setplayerSymbol] = useState({
+    X: 'Player 1',
+    O: 'Player 2',
+  });
+  // const [activePlayer, setActivePlayer] = useState('X'); Lift State Up to the APP component
 
   const activePlayer = deriveActivePlayer(gameTurns);
 
-  const gameBoard = initialBoard;
+  let gameBoard = [...initialBoard.map((arr) => [...arr])]; //We need a deep copy, not a referral copy
 
   for (const turn of gameTurns) {
     const { square, player } = turn;
@@ -50,7 +54,7 @@ function App() {
       firstSquareSymbol === secondSquareSymbol &&
       firstSquareSymbol === thirdSquareSymbol
     ) {
-      winnerPlayer = firstSquareSymbol;
+      winnerPlayer = playerSymbol[firstSquareSymbol];
     }
   }
 
@@ -70,6 +74,19 @@ function App() {
     });
   }
 
+  function handleRestart() {
+    setGameTurns([]);
+  }
+
+  function handlePlayerSymbol(symble, newPlayerName) {
+    setplayerSymbol((prevPlayers) => {
+      return {
+        ...prevPlayers,
+        [symble]: newPlayerName,
+      };
+    });
+  }
+
   return (
     <main>
       <div id="game-container">
@@ -78,14 +95,18 @@ function App() {
             initialName="Player 1"
             symbol="X"
             isActive={activePlayer === 'X'}
+            playerChange={handlePlayerSymbol}
           />
           <Player
             initialName="Player 2"
             symbol="O"
             isActive={activePlayer === 'O'}
+            playerChange={handlePlayerSymbol}
           />
         </ol>
-        {(winnerPlayer || hasDraw) && <Gameover winner={winnerPlayer} />}
+        {(winnerPlayer || hasDraw) && (
+          <Gameover winner={winnerPlayer} onRestart={handleRestart} />
+        )}
         <Gameboard onSelectedSquare={handleActivePlayer} board={gameBoard} />
       </div>
       <Log logturns={gameTurns} />

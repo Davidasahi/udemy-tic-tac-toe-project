@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 
-export default function Player({ initialName, symbol, isActive }) {
-  const [playerName, setplayerName] = useState(initialName);
+export default function Player({
+  initialName,
+  symbol,
+  isActive,
+  playerChange,
+}) {
+  const [playerName, setplayerName] = useState(initialName); //One for value, one for handle function
   const [isEditing, setIsEditing] = useState(false);
 
   function handleEditClick() {
     setIsEditing((Editing) => !Editing);
+
+    if (isEditing) {
+      playerChange(symbol, playerName);
+    }
   }
 
   function handleOnChangeName(e) {
@@ -22,8 +31,8 @@ export default function Player({ initialName, symbol, isActive }) {
           <input
             type="text"
             required
-            value={playerName}
-            onChange={handleOnChangeName}
+            value={playerName} //2 ways=>set the value to the useState
+            onChange={handleOnChangeName} //2 ways=>Set the value to your typing(Input only)
           />
         ) : (
           editingplayerName
